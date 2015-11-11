@@ -34,7 +34,9 @@ module.exports.routes = {
 
   '/': {
     view: 'homepage'
-  }
+  },
+
+  '/api/link': 'LinkController.showLink'
 
   /***************************************************************************
   *                                                                          *
