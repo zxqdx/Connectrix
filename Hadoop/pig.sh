@@ -1,0 +1,1 @@
+pig -x tez -param input="hdfs:///tmp/pigInput/aux/$1" -param output=/tmp/pigOutput parse.pig

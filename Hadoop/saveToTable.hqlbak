@@ -1,0 +1,29 @@
+ADD JAR hdfs:///tmp/PigToHive/json-serde-1.3.7-SNAPSHOT-jar-with-dependencies.jar;
+
+CREATE DATABASE IF NOT EXISTS connectrix;
+USE connectrix;
+DROP TABLE IF EXISTS temp;
+CREATE TABLE temp (
+  warcTargetUri string,
+  hostname string,
+  links array<struct<href: string, path: string, url: string, alt: string>>
+)
+ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
+STORED AS TEXTFILE;
+LOAD DATA INPATH '/tmp/PigToHive/part-v000-o000-r-00000' OVERWRITE INTO TABLE temp;
+
+DROP TABLE IF EXISTS aux;
+CREATE TABLE aux (
+  fromURL string,
+  toURL string,
+  hostname string,
+  linkPath string,
+  linkURL string,
+  linkAlt string
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
+
+Insert INTO table aux SELECT warcTargetUri AS fromURL, link.href AS toURL, hostname as hostname, link.path AS linkPath, link.url AS linkURL, link.alt AS linkAlt FROM temp LATERAL VIEW explode(links) tmp AS link;
+
+-- SELECT * from aux;
+-- DESCRIBE aux;
